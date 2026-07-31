@@ -3,7 +3,7 @@ import { ApiResponse } from "../utils/api-response.js";
 import { ApiError } from "../utils/api-error.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { emailVerificationMailgenContent, sendEmail } from "../utils/mail.js";
-import { trusted } from "mongoose";
+import crypto from "crypto";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -47,14 +47,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
   await user.save({ validateBeforeSave: false });
 
-  // await sendEmail({
-  //   email: user?.email,
-  //   subject: "Please verify ur email",
-  //   mailgenContent: emailVerificationMailgenContent(
-  //     user.username,
-  //     `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/${unhashedToken}`,
-  //   ),
-  // });
+  await sendEmail({
+    email: user?.email,
+    subject: "Please verify your email",
+    mailgenContent: emailVerificationMailgenContent(
+      user.username,
+      `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email/${unhashedToken}`,
+    ),
+  });
 
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken -emailVerificationToken -emailVerificationExpiry",
@@ -68,7 +68,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .status(201)
     .json(
       new ApiResponse(
-        200,
+        201,
         { user: createdUser },
         "User registered successfully and verification email has been sent on your email",
       ),
@@ -133,7 +133,7 @@ const logoutUser = asyncHandler(async (req, res) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     },
   );
   const options = {
@@ -193,7 +193,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
     )
 
 });
-const resendEmailVerification = asyncHandler (async (req, res) => {})
+const resendEmailVerification  = asyncHandler (async (req, res) => {})
 // const getCurrentUser = asyncHandler (async (req, res) => {})
 
 export { registerUser, login, logoutUser, getCurrentUser, verifyEmail, };

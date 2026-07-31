@@ -29,7 +29,9 @@ const userRegistedValidator = () => {
 const userLoginValidator = () => {
     return [
         body("email")
-        .optional()
+        .trim()
+        .notEmpty()
+        .withMessage("Email is required")
         .isEmail()
         .withMessage("Email is invalid"),
         body("password")

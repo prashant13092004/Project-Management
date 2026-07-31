@@ -24,6 +24,7 @@ app.use(
 
 import healthCheckRouter from "./routes/healthcheck.routes.js";
 import authRouter from "./routes/auth.routes.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
 
 app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/auth", authRouter);
@@ -31,5 +32,8 @@ app.use("/api/v1/auth", authRouter);
 app.get("/", (req, res) => {
   res.send("welcome to basecampy");
 });
+
+// global error handler — must be after all routes
+app.use(errorHandler);
 
 export default app;
